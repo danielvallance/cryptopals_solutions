@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
 
-members = [
+members = [ "crypto_utilities", "fixed_xor_2",
     "hex_to_base64_1",
 ]
