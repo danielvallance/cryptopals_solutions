@@ -134,6 +134,7 @@ mod tests {
                 "416e6f746865722070616464696e672074657374",
                 "QW5vdGhlciBwYWRkaW5nIHRlc3Q=",
             ),
+            ("abc", "qww="),
         ];
 
         for (hex, base64) in test_data {

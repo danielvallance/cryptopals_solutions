@@ -50,9 +50,16 @@ pub fn hex_to_binary_buffer(hex: &str) -> Result<Vec<u8>, String> {
         }
     }
 
-    /* Push a byte containing any leftover hex data */
+    /*
+     * Push a byte containing any leftover hex data
+     *
+     * This leftover part should occupy the least significant
+     * bits, otherwise the buffer would be insdistinguishable
+     * from the buffer resulting from the hex string with an extra
+     * zero on the end
+     */
     if hex.len() % 2 == 1 {
-        result.push(cur_byte);
+        result.push(cur_byte >> 4);
     }
 
     Ok(result)
@@ -106,7 +113,7 @@ mod tests {
     #[test]
     fn normal_hex_string_to_binary_buffer() {
         let test_data: [(&str, Vec<u8>); 2] =
-            [("4cd2", vec![76, 210]), ("8f61c", vec![143, 97, 192])];
+            [("4cd2", vec![76, 210]), ("8f61c", vec![143, 97, 12])];
 
         for (hex, buf) in test_data {
             let result = hex_to_binary_buffer(hex);
