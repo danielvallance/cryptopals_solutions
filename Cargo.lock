@@ -19,3 +19,10 @@ version = "0.1.0"
 dependencies = [
  "crypto_utilities",
 ]
+
+[[package]]
+name = "single_xor_cipher_3"
+version = "0.1.0"
+dependencies = [
+ "crypto_utilities",
+]
