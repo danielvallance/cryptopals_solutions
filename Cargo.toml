@@ -2,5 +2,5 @@
 resolver = "2"
 
 members = [ "crypto_utilities", "detect_single_char_xor_4", "fixed_xor_2",
-    "hex_to_base64_1", "single_xor_cipher_3",
+    "hex_to_base64_1", "repeating_key_xor_5", "single_xor_cipher_3",
 ]

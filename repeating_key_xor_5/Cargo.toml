@@ -1,0 +1,7 @@
+[package]
+name = "repeating_key_xor_5"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+crypto_utilities = { version = "0.1.0", path = "../crypto_utilities" }
