@@ -7,6 +7,13 @@ name = "crypto_utilities"
 version = "0.1.0"
 
 [[package]]
+name = "detect_single_char_xor_4"
+version = "0.1.0"
+dependencies = [
+ "single_xor_cipher_3",
+]
+
+[[package]]
 name = "fixed_xor_2"
 version = "0.1.0"
 dependencies = [

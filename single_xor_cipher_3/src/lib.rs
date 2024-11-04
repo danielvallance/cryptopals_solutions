@@ -11,12 +11,30 @@ use std::{
     str::Utf8Error,
 };
 
+/// Takes a file and calculates the reference percentages before
+/// cracking the cipher using single_xor_cipher_crack
+pub fn single_xor_cipher_crack_file(
+    encoded_msg: &str,
+    reference_file: &str,
+) -> Result<(u8, String, f32), String> {
+    // Get character frequencies of reference file
+    let reference_percentages = match get_file_character_percentages(reference_file) {
+        Ok(reference_percentages) => reference_percentages,
+        Err(e) => return Err(e.to_string()),
+    };
+
+    single_xor_cipher_crack(encoded_msg, &reference_percentages)
+}
+
 /// Takes hex data which has been encoded by a single byte XOR,
 /// and uses brute force and character frequency analysis to
 /// get the most likely solution
 ///
 /// On success, it will return the key and the decoded message string
-pub fn single_xor_cipher_crack(encoded_msg: &str) -> Result<(u8, String), String> {
+pub fn single_xor_cipher_crack(
+    encoded_msg: &str,
+    reference_percentages: &HashMap<char, f32>,
+) -> Result<(u8, String, f32), String> {
     if !is_valid_hex(encoded_msg) {
         return Err(format!(
             "Encoded hex message is not valid hex: {}",
@@ -32,12 +50,6 @@ pub fn single_xor_cipher_crack(encoded_msg: &str) -> Result<(u8, String), String
     let mut decoded_message = None;
     let mut best_key = None;
 
-    /* Get character frequencies of text file containing lots of text */
-    let reference_percentages = match get_file_character_percentages("sample-text.txt") {
-        Ok(reference_percentages) => reference_percentages,
-        Err(e) => return Err(e.to_string()),
-    };
-
     /* Try each single byte key */
     for key in 0..255 {
         /* If decoding each byte with XOR does not result in a valid UTF-8 string, skip that iteration */
@@ -48,7 +60,7 @@ pub fn single_xor_cipher_crack(encoded_msg: &str) -> Result<(u8, String), String
 
         let decoded_percentages = get_character_percentages(&decode_attempt);
 
-        let new_chi = get_chi_squared(&reference_percentages, decoded_percentages);
+        let new_chi = get_chi_squared(reference_percentages, decoded_percentages);
 
         /*
          * If this key results in a decoded message with more similar character frequencies
@@ -61,12 +73,12 @@ pub fn single_xor_cipher_crack(encoded_msg: &str) -> Result<(u8, String), String
         }
     }
 
-    if smallest_chi.is_none() {
+    if let Some(smallest_chi) = smallest_chi {
+        Ok((best_key.unwrap(), decoded_message.unwrap(), smallest_chi))
+    } else {
         Err(String::from(
             "Did not find any key which resulted in a valid decoded UTF-8 string",
         ))
-    } else {
-        Ok((best_key.unwrap(), decoded_message.unwrap()))
     }
 }
 
@@ -140,6 +152,8 @@ pub fn get_file_character_percentages(filename: &str) -> io::Result<HashMap<char
             .and_modify(|count| *count += 1)
             .or_insert(1);
         total_chars += 1;
+
+        line.clear();
     }
 
     let frequencies = counts
@@ -180,10 +194,10 @@ mod tests {
     #[test]
     fn crack_cipher() {
         let test_data = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736";
-        let result = single_xor_cipher_crack(test_data);
+        let result = single_xor_cipher_crack_file(test_data, "sample-text.txt");
         assert!(result.is_ok());
 
-        let (key, message) = result.unwrap();
+        let (key, message, _) = result.unwrap();
         assert_eq!(key, 88);
         assert_eq!(message, "Cooking MC's like a pound of bacon");
     }
