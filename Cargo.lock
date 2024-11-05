@@ -3,6 +3,10 @@
 version = 3
 
 [[package]]
+name = "break_repeating_key_xor_6"
+version = "0.1.0"
+
+[[package]]
 name = "crypto_utilities"
 version = "0.1.0"
 
