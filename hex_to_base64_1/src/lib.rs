@@ -32,12 +32,11 @@ pub fn base64_u8_to_utf8_char(base64: u8) -> Result<char, String> {
 }
 
 /// Converts base64 binary buffer to UTF-8 string
-pub fn base64_buf_to_utf8_string(buf: &[u8]) -> String {
-    let decode_error = "Error while decoding base64 character.";
+pub fn base64_buf_to_utf8_string(buf: &[u8]) -> Result<String, String> {
     let mut result = String::new();
 
     if buf.is_empty() {
-        return result;
+        return Ok(result);
     }
 
     /*
@@ -53,23 +52,23 @@ pub fn base64_buf_to_utf8_string(buf: &[u8]) -> String {
      */
     for (idx, byte) in buf.iter().enumerate() {
         if idx % 3 == 0 {
-            let c = base64_u8_to_utf8_char(byte >> 2).expect(decode_error);
+            let c = base64_u8_to_utf8_char(byte >> 2)?;
             result.push(c);
             leftovers = (byte & 0x3) << 4;
         } else if idx % 3 == 1 {
-            let c = base64_u8_to_utf8_char(leftovers | (byte >> 4)).expect(decode_error);
+            let c = base64_u8_to_utf8_char(leftovers | (byte >> 4))?;
             result.push(c);
             leftovers = (byte & 0xf) << 2;
         } else {
-            let c = base64_u8_to_utf8_char(leftovers | (byte >> 6)).expect(decode_error);
+            let c = base64_u8_to_utf8_char(leftovers | (byte >> 6))?;
             result.push(c);
-            result.push(base64_u8_to_utf8_char(byte & 0x3f).expect(decode_error));
+            result.push(base64_u8_to_utf8_char(byte & 0x3f)?);
         }
     }
 
     /* Add any leftover parts of the last processed byte */
     if buf.len() % 3 != 0 {
-        let c = base64_u8_to_utf8_char(leftovers).expect(decode_error);
+        let c = base64_u8_to_utf8_char(leftovers)?;
         result.push(c);
     }
 
@@ -78,7 +77,7 @@ pub fn base64_buf_to_utf8_string(buf: &[u8]) -> String {
         result.push('=');
     }
 
-    result
+    Ok(result)
 }
 
 /// Converts a &str representing hex data to a base64 buffer
@@ -105,8 +104,9 @@ mod tests {
         assert!(base64_buf.is_ok());
 
         let base64_string = base64_buf_to_utf8_string(&base64_buf.unwrap());
+        assert!(base64_string.is_ok());
         assert_eq!(
-            base64_string,
+            base64_string.unwrap(),
             String::from("SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t")
         );
     }
@@ -123,7 +123,8 @@ mod tests {
         assert_eq!(result, Ok(Vec::new()));
 
         let string = base64_buf_to_utf8_string(&result.unwrap());
-        assert_eq!(string, "");
+        assert!(string.is_ok());
+        assert_eq!(string.unwrap(), "");
     }
 
     #[test]
@@ -142,7 +143,8 @@ mod tests {
             assert!(result.is_ok());
 
             let string = base64_buf_to_utf8_string(&result.unwrap());
-            assert_eq!(string, base64);
+            assert!(string.is_ok());
+            assert_eq!(string.unwrap(), base64);
         }
     }
 

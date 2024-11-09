@@ -2,7 +2,7 @@
 //! which has been XOR-encoded, and finds the most likely
 //! key and decoded message based off character frequency analysis
 
-use single_xor_cipher_3::{get_file_character_percentages, single_xor_cipher_crack};
+use single_xor_cipher_3::{get_file_character_percentages, single_xor_hex_cipher_crack};
 use std::{
     fs::File,
     io::{BufRead, BufReader},
@@ -39,7 +39,7 @@ pub fn get_decoded_msg(filename: &str, reference_file: &str) -> Result<(u8, Stri
             Err(e) => return Err(e.to_string()),
         };
         /* Attempt to find the single byte XOR key for this hex string */
-        let cipher_crack_result = single_xor_cipher_crack(line.trim(), &reference_percentages);
+        let cipher_crack_result = single_xor_hex_cipher_crack(line.trim(), &reference_percentages);
         let (candidate_key, candidate_decoded_msg, candidate_chi) = match cipher_crack_result {
             Ok((key, decoded_msg, chi)) => (key, decoded_msg, chi),
             Err(_) => continue,

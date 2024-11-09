@@ -17,13 +17,13 @@ pub fn single_xor_cipher_crack_file(
     encoded_msg: &str,
     reference_file: &str,
 ) -> Result<(u8, String, f32), String> {
-    // Get character frequencies of reference file
+    /* Get character frequencies of reference file */
     let reference_percentages = match get_file_character_percentages(reference_file) {
         Ok(reference_percentages) => reference_percentages,
         Err(e) => return Err(e.to_string()),
     };
 
-    single_xor_cipher_crack(encoded_msg, &reference_percentages)
+    single_xor_hex_cipher_crack(encoded_msg, &reference_percentages)
 }
 
 /// Takes hex data which has been encoded by a single byte XOR,
@@ -31,7 +31,7 @@ pub fn single_xor_cipher_crack_file(
 /// get the most likely solution
 ///
 /// On success, it will return the key and the decoded message string
-pub fn single_xor_cipher_crack(
+pub fn single_xor_hex_cipher_crack(
     encoded_msg: &str,
     reference_percentages: &HashMap<char, f32>,
 ) -> Result<(u8, String, f32), String> {
@@ -45,6 +45,18 @@ pub fn single_xor_cipher_crack(
     /* Store hex data in buffer */
     let encoded_bytes = hex_to_binary_buffer(encoded_msg)?;
 
+    single_xor_cipher_crack(&encoded_bytes, reference_percentages)
+}
+
+/// Takes binary buffer which has been encoded by a single byte XOR,
+/// and uses brute force and character frequency analysis to
+/// get the most likely solution
+///
+/// On success, it will return the key and the decoded message string
+pub fn single_xor_cipher_crack(
+    encoded_bytes: &[u8],
+    reference_percentages: &HashMap<char, f32>,
+) -> Result<(u8, String, f32), String> {
     /* Keep track of key and message which have most similar character frequencies to the sample text */
     let mut smallest_chi = None;
     let mut decoded_message = None;
@@ -53,7 +65,7 @@ pub fn single_xor_cipher_crack(
     /* Try each single byte key */
     for key in 0..255 {
         /* If decoding each byte with XOR does not result in a valid UTF-8 string, skip that iteration */
-        let decode_attempt = match apply_xor_cipher(key, &encoded_bytes) {
+        let decode_attempt = match apply_xor_cipher(key, encoded_bytes) {
             Ok(decode_attempt) => decode_attempt,
             Err(_) => continue,
         };

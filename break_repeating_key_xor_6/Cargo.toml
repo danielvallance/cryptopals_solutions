@@ -4,3 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+hex_to_base64_1 = { version = "0.1.0", path = "../hex_to_base64_1" }
+repeating_key_xor_5 = { version = "0.1.0", path = "../repeating_key_xor_5" }
+single_xor_cipher_3 = { version = "0.1.0", path = "../single_xor_cipher_3" }
