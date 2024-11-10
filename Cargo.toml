@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
 
-members = [ "break_repeating_key_xor_6", "crypto_utilities", "detect_single_char_xor_4", "fixed_xor_2",
+members = [ "aes_128_ecb_7", "break_repeating_key_xor_6", "crypto_utilities", "detect_single_char_xor_4", "fixed_xor_2",
     "hex_to_base64_1", "repeating_key_xor_5", "single_xor_cipher_3",
 ]

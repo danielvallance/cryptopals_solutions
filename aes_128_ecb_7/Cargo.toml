@@ -1,0 +1,8 @@
+[package]
+name = "aes_128_ecb_7"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+break_repeating_key_xor_6 = { version = "0.1.0", path = "../break_repeating_key_xor_6" }
+openssl = "0.10.68"
