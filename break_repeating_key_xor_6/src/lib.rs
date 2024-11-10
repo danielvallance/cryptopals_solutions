@@ -184,16 +184,12 @@ pub fn base64_to_binary_buf(base64: &str) -> Result<Vec<u8>, String> {
         } else {
             /* If padding is encountered, push remaining bytes which contain data */
             match idx % 4 {
-                0 => (),
-                1 => buffer.push(temp[0]),
+                0 | 1 => return Err("Invalid padding position".to_string()),
                 2 => {
                     buffer.push(temp[0]);
-                    buffer.push(temp[1]);
                 }
                 _ => {
-                    for byte in temp {
-                        buffer.push(byte);
-                    }
+                    buffer.extend_from_slice(&temp[..2]);
                 }
             }
             break;
@@ -338,8 +334,23 @@ mod tests {
     }
 
     #[test]
+    fn base64_detect_invalid_padding() {
+        let test_data = ["=", "a=", "aaaa=", "aaaaa="];
+
+        for invalid_padding in test_data {
+            let buffer = base64_to_binary_buf(invalid_padding);
+            assert!(buffer.is_err());
+        }
+    }
+
+    #[test]
     fn base64_to_buf_and_back() {
-        let test_data = ["", "SGVsbG8gd29ybGQh"];
+        let test_data = [
+            "",
+            "SGVsbG8gd29ybGQh",
+            "SGVsbG8gd29ybGQ=",
+            "aGVsbG8gd29ybGQxMg==",
+        ];
 
         for base64_string in test_data {
             let buffer = base64_to_binary_buf(base64_string);
